@@ -3,6 +3,7 @@ import 'package:meals_app/screens/category_screen.dart';
 import 'package:meals_app/screens/meal_screen.dart';
 
 import '../model/Meal.dart';
+import '../widgets/main_drawer.dart';
 
 class TabScreen extends StatefulWidget {
   const TabScreen({super.key});
@@ -17,11 +18,24 @@ class _TabScreenState extends State<TabScreen> {
   int _selectedPageIndex = 0;
   final List<Meal> _favoriteMeals = [];
 
+  void _showInfoMessage(String msg) {
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg)),
+    );
+  }
+
   void _toggleMealFavoriteStatus(Meal meal) {
     if (_favoriteMeals.contains(meal)) {
-      _favoriteMeals.remove(meal);
+      setState(() {
+        _favoriteMeals.remove(meal);
+      });
+      _showInfoMessage('Meal is no longer a favorite');
     } else {
-      _favoriteMeals.add(meal);
+      setState(() {
+        _favoriteMeals.add(meal);
+      });
+      _showInfoMessage('Marked as a favorite!');
     }
   }
 
@@ -29,6 +43,13 @@ class _TabScreenState extends State<TabScreen> {
     setState(() {
       _selectedPageIndex = index;
     });
+  }
+
+  void _setScreen(String identifier) {
+    if (identifier == 'filters') {
+    } else {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
@@ -40,7 +61,7 @@ class _TabScreenState extends State<TabScreen> {
 
     if (_selectedPageIndex == 1) {
       activePage = MealScreen(
-        meals: [],
+        meals: _favoriteMeals,
         onToggleFavorite: _toggleMealFavoriteStatus,
       );
       activePageTitle = 'Favorites';
@@ -50,6 +71,7 @@ class _TabScreenState extends State<TabScreen> {
       appBar: AppBar(
         title: Text(activePageTitle),
       ),
+      drawer: MainDrawer(onSelectScreen: _setScreen),
       body: activePage,
       bottomNavigationBar: BottomNavigationBar(
         items: const [
